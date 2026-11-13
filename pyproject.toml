@@ -1,0 +1,194 @@
+[project]
+name = "argus"
+version = "0.1.0"
+description = "ARGUS 个人智能管家"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "av>=19.0.1",
+    "claude-agent-sdk==0.2.174",
+    "cryptography>=50.0.2",
+    "httpx2>=2.13.1",
+    "icalendar>=7.3.0",
+    "lunar-python==1.4.8",
+    "pydantic>=2.14.1",
+    "pyjwt[crypto]>=2.15.1",
+    "python-dotenv>=1.2.4",
+    "pyyaml>=6.0.3",
+    "recurring-ical-events>=3.8.2",
+    "sqlite-vec==0.1.9",
+    "starlette>=1.9.0",
+    "uvicorn>=0.54.0",
+    "websockets>=17.3",
+]
+
+[build-system]
+requires = ["uv_build>=0.11.28,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+audio = [
+    "numpy>=2.5.4",
+    "sherpa-onnx==1.13.8",
+    "sherpa-onnx-core==1.13.8",
+    "sounddevice>=0.5.6",
+    "onnxruntime==1.31.0",
+    "kaldi-native-fbank==1.22.3",
+    "tokenizers==0.23.3",
+]
+gpu = [
+    "torch==2.9.1 ; sys_platform == 'win32'",
+    "torchaudio==2.9.1 ; sys_platform == 'win32'",
+    "zipvoice ; sys_platform == 'win32'",
+    "urllib3 ; sys_platform == 'win32'",
+    "soundfile ; sys_platform == 'win32'",
+    "piper-phonemize @ https://github.com/csukuangfj/piper-phonemize/releases/download/v1.5.0/piper_phonemize-1.5.0-cp312-cp312-win_amd64.whl ; sys_platform == 'win32'",
+]
+dev = [
+    "import-linter>=2.15",
+    "mypy>=2.4.0",
+    "ruff>=0.17.0",
+    "types-pyyaml>=6.0.12.20260906",
+]
+
+[tool.uv]
+default-groups = ["dev", "audio", "gpu"]
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://mirror.nju.edu.cn/pytorch/whl/cu128"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu128" }
+torchaudio = { index = "pytorch-cu128" }
+zipvoice = { path = "third_party/zipvoice" }
+
+[tool.ruff]
+line-length = 100
+extend-exclude = ["*.md", "third_party"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "UP", "B", "ASYNC", "RUF", "TID251"]
+ignore = [
+    "E501",
+    "RUF001",
+    "RUF002",
+    "RUF003",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"!src/argus/**" = ["TID251"]
+"src/argus/infra/**" = ["TID251"]
+"src/argus/app/**" = ["TID251"]
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"datetime.datetime.now" = { msg = "改用注入的 Clock.now()" }
+"datetime.datetime.utcnow" = { msg = "改用注入的 Clock.now()" }
+"datetime.datetime.today" = { msg = "改用注入的 Clock.now()" }
+"datetime.date.today" = { msg = "改用注入的 Clock.now()" }
+"time.time" = { msg = "改用注入的 Clock.now()" }
+"time.time_ns" = { msg = "改用注入的 Clock.now()" }
+"time.monotonic" = { msg = "改用注入的 Clock.now()" }
+"time.sleep" = { msg = "改用注入的 Clock.sleep()（time.sleep 还会阻塞事件循环）" }
+"asyncio.sleep" = { msg = "改用注入的 Clock.sleep()" }
+"asyncio.wait_for" = { msg = "改用注入的 Clock.timeout()" }
+"asyncio.timeout" = { msg = "改用注入的 Clock.timeout()" }
+"asyncio.timeout_at" = { msg = "改用注入的 Clock.timeout()" }
+"uuid.uuid4" = { msg = "改用注入的 IdGen" }
+"uuid.uuid1" = { msg = "改用注入的 IdGen" }
+
+[tool.mypy]
+python_version = "3.12"
+files = ["src"]
+strict = true
+
+[[tool.mypy.overrides]]
+module = "argus.infra.*"
+disallow_untyped_calls = false
+disallow_subclassing_any = false
+disallow_untyped_decorators = false
+disallow_any_generics = false
+warn_return_any = false
+
+[[tool.mypy.overrides]]
+module = [
+    "sounddevice",
+    "sherpa_onnx",
+    "onnxruntime",
+    "kaldi_native_fbank",
+    "numpy",
+    "tokenizers",
+    "torch",
+    "torchaudio",
+    "safetensors.*",
+    "soundfile",
+    "sqlite_vec",
+    "recurring_ical_events",
+    "lunar_python",
+    "vocos",
+    "zipvoice.*",
+]
+ignore_missing_imports = true
+
+[tool.importlinter]
+root_package = "argus"
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+name = "依赖只能向下，同一行 | 隔开的模块互不引用"
+type = "layers"
+containers = ["argus"]
+exhaustive = true
+layers = [
+    "app",
+    "infra",
+    "session | proactive",
+    "routing | cognition | knowledge",
+    "memory | delivery | codeagent",
+    "speech | situation",
+    "action",
+    "governance",
+    "llm | channels | scheduler",
+    "kernel",
+]
+
+[[tool.importlinter.contracts]]
+name = "业务模块不做 IO：禁止导入网络、数据库、音频、进程类库"
+type = "forbidden"
+source_modules = ["argus"]
+forbidden_modules = [
+    "httpx",
+    "openai",
+    "sqlite3",
+    "sounddevice",
+    "websockets",
+    "httpx2",
+    "socket",
+    "subprocess",
+    "ollama",
+    "mcp",
+    "uvicorn",
+    "requests",
+    "aiohttp",
+    "aiosqlite",
+    "pyaudio",
+]
+ignore_imports = [
+    "argus.infra -> *",
+    "argus.infra.** -> *",
+    "argus.app -> *",
+    "argus.app.** -> *",
+]
+unmatched_ignore_imports_alerting = "none"
+
+[[tool.importlinter.contracts]]
+name = "只有 app 读配置文件和密钥文件"
+type = "forbidden"
+source_modules = ["argus"]
+forbidden_modules = ["yaml", "dotenv"]
+ignore_imports = [
+    "argus.app -> *",
+    "argus.app.** -> *",
+]
+unmatched_ignore_imports_alerting = "none"

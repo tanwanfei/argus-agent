@@ -1,0 +1,36 @@
+# 原样复制的 ZipVoice 推理代码（D0-2），来源见同目录 README.md。
+# 上游仓库没有打包配置，本文件是 ARGUS 加的：只为让 uv 把它当本地包装进 gpu 依赖组
+[project]
+name = "zipvoice"
+# 上游没有版本号；加号后面是复制的那个提交，uv pip list 里看得到
+version = "0.0.0+2f7326fb"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+# 照抄上游 requirements.txt（同一提交），不增不减。torch、torchaudio 从哪个源装，
+# piper_phonemize 从哪下载，在 ARGUS 的 pyproject.toml 里定
+dependencies = [
+    "torch",
+    "torchaudio",
+    "numpy",
+    "lhotse",
+    "huggingface_hub",
+    "safetensors",
+    "tensorboard",
+    "vocos",
+    "pydub",
+    "cn2an",
+    "inflect",
+    "jieba",
+    "piper_phonemize",
+    "pypinyin",
+    "setuptools<81",
+]
+
+[build-system]
+requires = ["uv_build>=0.11.28,<0.12.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+# 包直接放在本目录下（zipvoice/），不是 uv_build 默认的 src/zipvoice/
+module-root = ""

@@ -1,0 +1,26 @@
+overrides: {}
+
+code_agent:
+  max_turns: 200
+  timeout_min: 60
+  work_root: D:/ARGUS-work
+  keep_days: 7
+  refused_commands:
+    - git push
+    - gh
+    - npm publish
+    - docker push
+    - ssh
+    - scp
+    - sftp
+    - taskkill /im
+    - taskkill /fi
+    - stop-process -name
+    - pkill
+    - killall
+    - shutdown
+    - restart-computer
+    - stop-computer
+    - schtasks
+    - reg add
+    - reg delete

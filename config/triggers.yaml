@@ -1,0 +1,47 @@
+timer_due:
+  enabled: true
+
+reminder_due:
+  enabled: true
+reminder_missed:
+  enabled: true
+
+place_reminder_due:
+  enabled: true
+
+disk_space_low:
+  enabled: true
+backup_failed:
+  enabled: true
+home_assistant_unreachable:
+  enabled: true
+app_signature_expiring:
+  enabled: true
+budget_threshold_reached:
+  enabled: true
+
+code_task_finished:
+  enabled: true
+code_task_needs_attention:
+  enabled: true
+
+timer_missed:
+  enabled: true
+
+deferred_turn_answered:
+  enabled: true
+deferred_turn_given_up:
+  enabled: true
+
+meeting_soon:
+  enabled: true
+
+weather_alert:
+  enabled: true
+
+today_weather:
+  enabled: true
+  cooling_degrees: 5
+
+birthday_today:
+  enabled: true

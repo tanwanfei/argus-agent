@@ -1,0 +1,1 @@
+ALTER TABLE llm_cost ADD COLUMN estimated INTEGER NOT NULL DEFAULT 0 CHECK (estimated IN (0, 1));

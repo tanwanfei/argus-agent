@@ -1,0 +1,35 @@
+name: Argus
+
+packages:
+  ArgusCore:
+    path: ArgusCore
+
+targets:
+  ArgusApp:
+    type: application
+    platform: iOS
+    deploymentTarget: "18.0"
+    sources: [ArgusApp]
+    dependencies:
+      - package: ArgusCore
+    scheme: {}
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: local.argus.app
+        TARGETED_DEVICE_FAMILY: "1"
+        SWIFT_VERSION: "6.0"
+    info:
+      path: ArgusApp/Info.plist
+      properties:
+        CFBundleDisplayName: 阿格斯
+        CFBundleShortVersionString: "0.1.0"
+        NSMicrophoneUsageDescription: 阿格斯要用麦克风听你说话
+        NSFaceIDUsageDescription: 阿格斯用面容 ID 确认高风险操作
+        NSLocationWhenInUseUsageDescription: 会话中阿格斯要知道你在哪，回答「附近」「天气」这类问题
+        NSLocationAlwaysAndWhenInUseUsageDescription: 不打开 App 时，阿格斯也要知道你到了、离开了常去的地方，到点提醒你
+        UIBackgroundModes: [audio, location]
+        CFBundleURLTypes:
+          - CFBundleURLName: local.argus.app
+            CFBundleURLSchemes: [argus]
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]

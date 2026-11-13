@@ -1,0 +1,44 @@
+monthly_budget_yuan: 150
+
+main:
+  base_url: https://api.deepseek.com
+  model: deepseek-flash
+  price:
+    input_cache_hit: 0.02
+    input_cache_miss: 1
+    output: 4
+    peak:
+      input_cache_hit: 0.04
+      input_cache_miss: 2
+      output: 8
+    peak_hours: [[9, 12], [14, 18]]
+  proxy: null
+  thinking: low
+  extra_body: {}
+
+failover:
+  first_chunk_timeout_s: 5
+  cooldown_s: 60
+  fallback:
+    base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+    model: qwen3.8-max
+    price:
+      input_cache_hit: 12
+      input_cache_miss: 12
+      output: 36
+    proxy: null
+    extra_body:
+      enable_thinking: false
+
+code_agent:
+  base_url: https://api.deepseek.com/anthropic
+  model: deepseek-flash
+  price:
+    input_cache_hit: 0.02
+    input_cache_miss: 1
+    output: 4
+    peak:
+      input_cache_hit: 0.04
+      input_cache_miss: 2
+      output: 8
+    peak_hours: [[9, 12], [14, 18]]

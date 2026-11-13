@@ -1,0 +1,77 @@
+data_root: D:/ARGUS-data
+
+backup_dir: D:/ARGUS-backup
+disk_free_alert_gb: 10
+
+app_signature_alert_days: 1
+
+chat_history_days: 7
+
+proactive:
+  speak_at: 50
+  notify_at: 20
+  drop_below: 3
+  urgent_at: 8
+  speak_per_day: 3
+  notify_per_day: 10
+  stage: 1
+  digest_at: ["07:00", "20:00"]
+  sleep: ["23:30", "07:00"]
+
+home:
+  latitude: 39.90
+  longitude: 116.40
+server:
+  port: 8765
+
+audio:
+  input_device: "麦克风 (USB Audio Device)"
+  input_channel: 0
+  output_device: "扬声器 (USB Audio Device)"
+
+tts:
+  engine: cosyvoice
+  zipvoice:
+    num_steps: 8
+    voice_wav: D:/ARGUS-data/models/tts/voice/prompt.wav
+    voice_text: "这里写参考音频里说的那句话。"
+  cosyvoice:
+    model: cosyvoice-v3-flash
+    voice: longxiaochun_v3
+
+asr:
+  engine: aliyun
+  aliyun:
+    model: fun-asr-realtime
+
+wakeword:
+  keyword: "ā g é s ī"
+  max_active_paths: 32
+  keywords_score: 1.5
+  keywords_threshold: 0.05
+
+vad:
+  ask_turn_after_silence_ms: 500
+  max_silence_ms: 1500
+  use_turn_detector: true
+
+speaker:
+  threshold: 0.50
+  app_threshold: 0.50
+  save_app_sentences: false
+
+home_assistant:
+  url: http://homeassistant.local
+  air_conditioner: climate.living_room_ac
+  temperature_sensor: sensor.living_room_temperature
+  humidity_sensor: sensor.living_room_humidity
+calendar:
+  url: https://caldav.icloud.com
+  write_calendar: 个人
+
+mail:
+  imap_host: imap.example.com
+  imap_port: 993
+  drafts_folder: 草稿箱
+  smtp_host: smtp.example.com
+  smtp_port: 465

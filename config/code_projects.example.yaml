@@ -1,0 +1,6 @@
+projects:
+  博客:
+    path: D:/projects/blog
+    writable: true
+  周报:
+    path: D:/documents/weekly

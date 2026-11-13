@@ -1,0 +1,8 @@
+CREATE TABLE sit_place (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE,
+    lat REAL NOT NULL CHECK (lat BETWEEN -90 AND 90),
+    lng REAL NOT NULL CHECK (lng BETWEEN -180 AND 180),
+    radius_m REAL NOT NULL,
+    updated_at TEXT NOT NULL
+) STRICT;
