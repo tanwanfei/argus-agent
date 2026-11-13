@@ -10,6 +10,7 @@ from argus.infra.speaker.voiceprint import Voiceprint
 VOICEPRINT_FILE_NAME = "voiceprint.json"
 _NAMED_PREFIX = "voiceprint-"
 _NAME_PATTERN = re.compile(r"[a-z0-9]+(-[a-z0-9]+)*")
+_ARRAY_NAME_PREFIX = "array"
 
 
 class VoiceprintFileError(Exception):
@@ -65,6 +66,10 @@ def named_voiceprint_path(home_path: Path, name: str) -> Path:
             f"声纹的名字只能用小写字母、数字和连字符，比如 phone、airpods：{name!r} 不行"
         )
     return home_path.with_name(f"{_NAMED_PREFIX}{name}.json")
+
+
+def recorded_on_the_array(name: str) -> bool:
+    return name.startswith(_ARRAY_NAME_PREFIX)
 
 
 def named_voiceprint_paths(home_path: Path) -> dict[str, Path]:

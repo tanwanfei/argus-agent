@@ -22,6 +22,7 @@ from argus.app.voiceprint_file import (
     VoiceprintFileError,
     load_voiceprint,
     named_voiceprint_paths,
+    recorded_on_the_array,
 )
 from argus.channels.endpoint import Endpoint
 from argus.delivery.delivery import SentenceSynthesizer
@@ -180,13 +181,16 @@ def speaker_checks(
     config: Config, speaker: SpeakerConfig, clock: Clock
 ) -> tuple[SpeakerCheck, SpeakerCheck]:
     named_paths = named_voiceprint_paths(config.voiceprint_path)
+    array_names = [name for name in named_paths if recorded_on_the_array(name)]
     try:
         home_voiceprint = load_voiceprint(config.voiceprint_path)
-        named_voiceprints = [load_voiceprint(path) for path in named_paths.values()]
+        named_voiceprints = {name: load_voiceprint(path) for name, path in named_paths.items()}
         embedding = load_speaker_embedding(config.models_dir)
-        home_verifier = VoiceprintVerifier(embedding, [home_voiceprint])
+        home_verifier = VoiceprintVerifier(
+            embedding, [home_voiceprint, *(named_voiceprints[name] for name in array_names)]
+        )
         app_verifier: SpeakerVerifier = VoiceprintVerifier(
-            embedding, [home_voiceprint, *named_voiceprints]
+            embedding, [home_voiceprint, *named_voiceprints.values()]
         )
     except (VoiceprintFileError, ValueError) as error:
         logger.warning("家里的阵列认不了人，每句都当不是你。%s", error)
@@ -194,7 +198,12 @@ def speaker_checks(
         return home_check, home_check.for_app(None, speaker.app_threshold)
     except OSError as error:
         raise VoiceSetupError(f"声纹模型加载失败。{error}") from error
-    logger.info("家里的阵列按声纹认人，阈值 %.2f", speaker.threshold)
+    logger.info(
+        "家里的阵列按声纹认人，阈值 %.2f，比 %d 份声纹（%s）取最高的",
+        speaker.threshold,
+        1 + len(array_names),
+        "、".join(["家里阵列", *array_names]),
+    )
     logger.info(
         "App 那条路按声纹认人，阈值 %.2f，比 %d 份声纹（%s）取最高的",
         speaker.app_threshold,
@@ -312,8 +321,11 @@ def load_speaker_embedding(models_dir: Path) -> "SherpaSpeakerEmbedding":
 
 
 def load_speaker_verifier(models_dir: Path, voiceprint_path: Path) -> VoiceprintVerifier:
-    voiceprint = load_voiceprint(voiceprint_path)
-    return VoiceprintVerifier(load_speaker_embedding(models_dir), [voiceprint])
+    voiceprints = [load_voiceprint(voiceprint_path)]
+    for name, path in named_voiceprint_paths(voiceprint_path).items():
+        if recorded_on_the_array(name):
+            voiceprints.append(load_voiceprint(path))
+    return VoiceprintVerifier(load_speaker_embedding(models_dir), voiceprints)
 
 
 def load_tts(models_dir: Path, tts_config: ZipVoiceConfig) -> "ZipVoiceTts":

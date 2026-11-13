@@ -145,7 +145,7 @@ uv run python -m argus.app.cli --help
 常用的有：
 
 - 录音、放音：`record`、`play`
-- 声纹：`enroll-voice`、`score-voice`、`calibrate-voice`
+- 声纹：`enroll-voice`、`score-voice`、`calibrate-voice`。另录一份用 `enroll-voice --as 名字`：名字以 `array` 开头的（在家里麦克风阵列前录的）家里和 App 都比，别的（手机、耳机录的）只给 App 比
 - 不开主进程试对话：`ask`、`chat`
 - 调唤醒词和判停：`wake`、`vad`
 - App 和推送：`new-app-token`、`new-bark-key`、`push`

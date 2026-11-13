@@ -1,4 +1,5 @@
 import logging
+import random
 from collections.abc import AsyncGenerator, Awaitable, Iterable, Mapping, Sequence
 from contextlib import aclosing
 from dataclasses import dataclass
@@ -111,10 +112,21 @@ class Brain:
         self._executor = executor
         self._clock = clock
         self._memory = memory
+        self._last_closing_reply: str | None = None
 
     def _announce_of(self, tool_name: str) -> str | None:
         registered = self._registry.get(tool_name)
         return None if registered is None else registered.spec.announce
+
+    def _closing_replies_of(self, tool_name: str) -> tuple[str, ...]:
+        registered = self._registry.get(tool_name)
+        return () if registered is None else registered.spec.closing_replies
+
+    def _pick_closing_reply(self, replies: tuple[str, ...]) -> str:
+        choices = [reply for reply in replies if reply != self._last_closing_reply] or list(replies)
+        picked = random.choice(choices)
+        self._last_closing_reply = picked
+        return picked
 
     async def respond(self, turn: TurnInput) -> AsyncGenerator[ReplyEvent]:
         tool_context = ToolContext(
@@ -197,6 +209,7 @@ class Brain:
                 round_number = tool_rounds.started
                 model_spoke_first = bool("".join(said).strip())
                 messages.append(ToolCallsMessage("".join(said), tuple(tool_calls), reasoning))
+                closing_replies: tuple[str, ...] = ()
                 for tool_call in tool_calls:
                     yield ToolStarted(
                         tool_call.name,
@@ -227,6 +240,15 @@ class Brain:
                     messages.append(ToolResultMessage(tool_call.id, _outcome_text(outcome)))
                     if isinstance(outcome, ToolDone) and outcome.result.remember is not None:
                         yield Remember(outcome.result.remember)
+                    if isinstance(outcome, ToolDone):
+                        closing_replies = closing_replies or self._closing_replies_of(
+                            tool_call.name
+                        )
+                if closing_replies:
+                    if not model_spoke_first:
+                        yield Sentence(self._pick_closing_reply(closing_replies))
+                    yield Done(tuple(usages))
+                    return
         except _TurnStopped as stopped:
             logger.warning("回合没办完就停了：%s", stopped.what_to_say)
             yield Sentence(stopped.what_to_say)

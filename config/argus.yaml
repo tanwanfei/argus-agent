@@ -57,7 +57,7 @@ vad:
 
 speaker:
   threshold: 0.50
-  app_threshold: 0.50
+  app_threshold: 0.45
   save_app_sentences: false
 
 home_assistant:

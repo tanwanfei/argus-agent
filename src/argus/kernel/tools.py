@@ -41,6 +41,7 @@ class ToolSpec:
     extra_details: Callable[[Any], Awaitable[Sequence[str]]] | None = None
     announce: str | None = None
     done_reply: str | None = None
+    closing_replies: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         unknown_names = self.sensitive.difference(self.params.model_fields)
@@ -102,6 +103,7 @@ def tool[ArgsT: BaseModel](
     extra_details: Callable[[ArgsT], Awaitable[Sequence[str]]] | None = None,
     announce: str | None = None,
     done_reply: str | None = None,
+    closing_replies: tuple[str, ...] = (),
 ) -> Callable[[Callable[[ArgsT, ToolContext], Awaitable[ToolResult]]], ToolFn]:
     spec = ToolSpec(
         name=name,
@@ -115,6 +117,7 @@ def tool[ArgsT: BaseModel](
         extra_details=extra_details,
         announce=announce,
         done_reply=done_reply,
+        closing_replies=closing_replies,
     )
 
     def bind(run: Callable[[ArgsT, ToolContext], Awaitable[ToolResult]]) -> ToolFn:
